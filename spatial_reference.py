@@ -13,6 +13,7 @@ class SpatialReference:
         page_str = ""
         if page is not None:
             page_str = "&page=%d" % page
+        query = re.sub(" ", "+", query)
         spatial_reference_url = "http://spatialreference.org/ref/epsg/?search=%s&srtext=Search%s" % (query, page_str)
         query_result = SpatialReference.load_url_content(spatial_reference_url)
         epsgs = re.findall('<li><a href="/ref/epsg/[0-9]*/">[A-Za-z\/\:\>\< 0-9]*</li>', query_result)
@@ -29,7 +30,7 @@ class SpatialReference:
         return results
     """
 execfile("spatial_reference.py")
-SpatialReference.epsg_search("NAD27")
+SpatialReference.epsg_search("Florida West")
 
     """
 
