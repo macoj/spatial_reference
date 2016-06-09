@@ -18,7 +18,7 @@ class SpatialReference:
         for epsg in epsgs:
             epsg_hit = 0
             for p in points:
-                y, x = SpatialReference.convert_spatial_reference(p[0], p[1], epsg[0], 4326)
+                x, y = SpatialReference.convert_spatial_reference(p[0], p[1], epsg[0], 4326)
                 if y_min < y < y_max and x_min < x < x_max:
                     epsg_hit += 1
             epsgs_hits.append((epsg[0], epsg_hit))
@@ -28,6 +28,14 @@ class SpatialReference:
     execfile("spatial_reference.py")
     points = [(7647409.02929, 686790.02595000004), (7647471.0159499999, 688344.44999999995),  (7645653.23905, 684826.79570999998), (7645656.2857100004, 684567.37809999997)]
     epsgs = SpatialReference.guess_the_projection(points, state="Oregon")
+    for epsg, hits in epsgs[:5]:
+        print "[EPSG:%d] %.0f%% hit" % (epsg, float(hits)/len(points)*100.0)
+    points = [(2514332.03903053, 7018364.6881987797), (2503623.9508441598, 6974201.6616298398), (2499328.3021238302, 6939465.4717225898), (2499328.3021238302, 6939465.4717225898), (2499328.3021238302, 6939465.4717225898)]
+    epsgs = SpatialReference.guess_the_projection(points, state="Texas")
+    for epsg, hits in epsgs[:5]:
+        print "[EPSG:%d] %.0f%% hit" % (epsg, float(hits)/len(points)*100.0)
+    points = [(894672.5, 995003.69999999995), (900456.30000000005, 1017035.0), (900456.30000000005, 1017035.0), (882164.59999999998, 999102.19999999995), (891889.30000000005, 1034635.0), (898334.0, 1022420.0), (894343.0, 1005425.0), (893510.30000000005, 1033772.0), (883747.80000000005, 1004093.0), (877404.59999999998, 1027557.0)]
+    epsgs = SpatialReference.guess_the_projection(points, state="Missouri")
     for epsg, hits in epsgs[:5]:
         print "[EPSG:%d] %.0f%% hit" % (epsg, float(hits)/len(points)*100.0)
     """
@@ -56,6 +64,7 @@ class SpatialReference:
     """
 execfile("spatial_reference.py")
 SpatialReference.epsg_search("oregon")
+SpatialReference.epsg_search("Texas")
     """
 
     @staticmethod
@@ -77,11 +86,10 @@ SpatialReference.epsg_search("oregon")
         point_transform = osr.CoordinateTransformation(source_reference, target_reference)
         transformed_point = ogr.CreateGeometryFromWkt("POINT (%f %f)" % (point_longitude, point_latitude))
         transformed_point.Transform(point_transform)
-        return transformed_point.GetY(), transformed_point.GetX()
+        return transformed_point.GetX(), transformed_point.GetY()
     """
     execfile("spatial_reference.py")
     point_longitude = 686790.02595000004
     point_latitude = 7647409.02929
     SpatialReference.convert_spatial_reference(point_latitude, point_longitude, 2269, 4326)
-    Nominatim.nominatim_get_bounding_box_of(state="Oregon")
     """

@@ -25,3 +25,18 @@ which returns:
 [EPSG:2839] 0% hit
 ```
 This function tries to figure out the projection of these points by trying all the projections with "Oregon" in their description in ```spatialreferece.org``` then checks if the transformed points fall within the bounding box of Oregon with a known projection.
+
+Other examples:
+```python
+# some points in Dallas
+points = [(2514332.03903053, 7018364.6881987797), (2503623.9508441598, 6974201.6616298398), (2499328.3021238302, 6939465.4717225898), (2499328.3021238302, 6939465.4717225898), (2499328.3021238302, 6939465.4717225898)]
+epsgs = SpatialReference.guess_the_projection(points, state="Texas")
+for epsg, hits in epsgs[:5]:
+    print "[EPSG:%d] %.0f%% hit" % (epsg, float(hits)/len(points)*100.0)
+
+# some points in St. Louis:
+points = [(894672.5, 995003.69999999995), (900456.30000000005, 1017035.0), (900456.30000000005, 1017035.0), (882164.59999999998, 999102.19999999995), (891889.30000000005, 1034635.0), (898334.0, 1022420.0), (894343.0, 1005425.0), (893510.30000000005, 1033772.0), (883747.80000000005, 1004093.0), (877404.59999999998, 1027557.0)]
+epsgs = SpatialReference.guess_the_projection(points, state="Missouri")
+for epsg, hits in epsgs[:5]:
+    print "[EPSG:%d] %.0f%% hit" % (epsg, float(hits)/len(points)*100.0)
+```
