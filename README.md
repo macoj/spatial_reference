@@ -9,4 +9,4 @@ print SpatialReference.epsg_search("Florida West")
 ```
 
 #TODO
-Let's say that I have a set of points of a city, but I do not have any clue about the projection of such points. How to find the projection or at least a good guess?
+* Let's say that I have a set of points of a city, but I do not have any clue about the projection of such points. How to find the projection or at least a good guess?
