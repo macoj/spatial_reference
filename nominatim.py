@@ -22,5 +22,5 @@ class Nominatim():
         if polygon:
             if len(result) > 0:
                 bb = map(float, result[0]['boundingbox'])
-                result = [(bb[2], bb[0]), (bb[3], bb[0]), (bb[3], bb[1]), (bb[2], bb[1])]
+                result = bb[:4]
         return result

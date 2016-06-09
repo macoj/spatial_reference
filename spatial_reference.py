@@ -1,11 +1,34 @@
 __author__ = 'marcos'
 import re
 import urllib2
+from osgeo import osr
+from osgeo import ogr
+from nominatim import Nominatim
 
 
 class SpatialReference:
     def __init__(self):
         pass
+
+    @staticmethod
+    def guess_the_projection(points, state=None):
+        epsgs_hits = []
+        epsgs = SpatialReference.epsg_search(state)
+        y_min, y_max, x_min, x_max = Nominatim.nominatim_get_bounding_box_of(state=state)
+        for epsg in epsgs:
+            epsg_hit = 0
+            for p in points:
+                y, x = SpatialReference.convert_spatial_reference(p[0], p[1], epsg[0], 4326)
+                if y_min < y < y_max and x_min < x < x_max:
+                    epsg_hit += 1
+            epsgs_hits.append((epsg[0], epsg_hit))
+        epsgs_hits.sort(key=lambda x: x[1], reverse=True)
+        return epsgs_hits
+    """
+    execfile("spatial_reference.py")
+    points = [(7647409.02929, 686790.02595000004), (7647471.0159499999, 688344.44999999995),  (7645653.23905, 684826.79570999998), (7645656.2857100004, 684567.37809999997)]
+    SpatialReference.guess_the_projection(points, state="Oregon")
+    """
 
     @staticmethod
     def epsg_search(query, page=None):
@@ -16,10 +39,10 @@ class SpatialReference:
         query = re.sub(" ", "+", query)
         spatial_reference_url = "http://spatialreference.org/ref/epsg/?search=%s&srtext=Search%s" % (query, page_str)
         query_result = SpatialReference.load_url_content(spatial_reference_url)
-        epsgs = re.findall('<li><a href="/ref/epsg/[0-9]*/">[A-Za-z\/\:\>\< 0-9]*</li>', query_result)
+        epsgs = re.findall('<li><a href="/ref/epsg/[0-9]*/">[A-Za-z\/\:\>\< 0-9\(\)]*</li>', query_result)
         for epsg_html in epsgs:
             epsg = re.search("/ref/epsg/[0-9]*", epsg_html).group()
-            epsg = epsg[10:]
+            epsg = int(epsg[10:])
             description = re.search(": [A-Za-z/:>< 0-9]*", epsg_html).group()[2:-5]
             results.append((epsg, description))
         if re.search("Next Page", query_result):
@@ -30,8 +53,7 @@ class SpatialReference:
         return results
     """
 execfile("spatial_reference.py")
-SpatialReference.epsg_search("Florida West")
-
+SpatialReference.epsg_search("oregon")
     """
 
     @staticmethod
@@ -43,3 +65,21 @@ SpatialReference.epsg_search("Florida West")
         content = handle.read()
         load_content = content
         return load_content
+
+    @staticmethod
+    def convert_spatial_reference(point_longitude, point_latitude, source, target):
+        source_reference = osr.SpatialReference()
+        source_reference.ImportFromEPSG(source)
+        target_reference = osr.SpatialReference()
+        target_reference.ImportFromEPSG(target)
+        point_transform = osr.CoordinateTransformation(source_reference, target_reference)
+        transformed_point = ogr.CreateGeometryFromWkt("POINT (%f %f)" % (point_longitude, point_latitude))
+        transformed_point.Transform(point_transform)
+        return transformed_point.GetY(), transformed_point.GetX()
+    """
+    execfile("spatial_reference.py")
+    point_longitude = 686790.02595000004
+    point_latitude = 7647409.02929
+    SpatialReference.convert_spatial_reference(point_latitude, point_longitude, 2269, 4326)
+    Nominatim.nominatim_get_bounding_box_of(state="Oregon")
+    """
