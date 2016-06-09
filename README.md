@@ -1,5 +1,5 @@
 # spatial_reference
-Sometimes I need to search an EPSG from spatialreferece.org.
+Sometimes I need to search an EPSG from ```spatialreferece.org```.
 
 ```python
 execfile("spatial_reference.py")
@@ -14,6 +14,9 @@ points = [(7647409.02929, 686790.02595000004), (7647471.0159499999, 688344.44999
 epsgs = SpatialReference.guess_the_projection(points, state="Oregon")
 for epsg, hits in epsgs[:5]:
     print "[EPSG:%d] %.0f%% hit" % (epsg, float(hits)/len(points)*100.0)
+```
+which returns:
+```bash
 [EPSG:2269] 100% hit
 [EPSG:2913] 100% hit
 [EPSG:3646] 100% hit
@@ -21,3 +24,4 @@ for epsg, hits in epsgs[:5]:
 [EPSG:2838] 0% hit
 [EPSG:2839] 0% hit
 ```
+This function tries to figure out the projection of these points by trying all the projections with "Oregon" in their description in ```spatialreferece.org``` then checks if the transformed points fall within the bounding box of Oregon with a known projection.
