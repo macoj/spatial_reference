@@ -27,7 +27,9 @@ class SpatialReference:
     """
     execfile("spatial_reference.py")
     points = [(7647409.02929, 686790.02595000004), (7647471.0159499999, 688344.44999999995),  (7645653.23905, 684826.79570999998), (7645656.2857100004, 684567.37809999997)]
-    SpatialReference.guess_the_projection(points, state="Oregon")
+    epsgs = SpatialReference.guess_the_projection(points, state="Oregon")
+    for epsg, hits in epsgs[:5]:
+        print "[EPSG:%d] %.0f%% hit" % (epsg, float(hits)/len(points)*100.0)
     """
 
     @staticmethod
