@@ -7,18 +7,28 @@ from nominatim import Nominatim
 
 
 class SpatialReference:
+    meter_to_feet = 0.3048
+    feet_to_meter = 1/meter_to_feet
+
     def __init__(self):
         pass
 
     @staticmethod
-    def guess_the_projection(points, state=None):
+    def guess_the_projection(points, state=None, spatial_reference_query=None, city=None, conversion=None):
         epsgs_hits = []
-        epsgs = SpatialReference.epsg_search(state)
-        y_min, y_max, x_min, x_max = Nominatim.nominatim_get_bounding_box_of(state=state)
+        if spatial_reference_query is None:
+            spatial_reference_query = state
+        epsgs = SpatialReference.epsg_search(spatial_reference_query)
+        y_min, y_max, x_min, x_max = Nominatim.nominatim_get_bounding_box_of(state=state, city=city)
         for epsg in epsgs:
             epsg_hit = 0
             for p in points:
-                x, y = SpatialReference.convert_spatial_reference(p[0], p[1], epsg[0], 4326)
+                try:
+                    x, y = SpatialReference.convert_spatial_reference(p[0], p[1], epsg[0], 4326, conversion=conversion)
+                except:
+                    print "Could not find EPSG:'%s'" % epsg[0]
+                    break
+                # print x, x_min, x_max
                 if y_min < y < y_max and x_min < x < x_max:
                     epsg_hit += 1
             epsgs_hits.append((epsg[0], epsg_hit))
@@ -35,7 +45,7 @@ class SpatialReference:
     for epsg, hits in epsgs[:5]:
         print "[EPSG:%d] %.0f%% hit" % (epsg, float(hits)/len(points)*100.0)
     points = [(894672.5, 995003.69999999995), (900456.30000000005, 1017035.0), (900456.30000000005, 1017035.0), (882164.59999999998, 999102.19999999995), (891889.30000000005, 1034635.0), (898334.0, 1022420.0), (894343.0, 1005425.0), (893510.30000000005, 1033772.0), (883747.80000000005, 1004093.0), (877404.59999999998, 1027557.0)]
-    epsgs = SpatialReference.guess_the_projection(points, state="Missouri")
+    epsgs = SpatialReference.guess_the_projection(points, state="Missouri", city="St. Louis", conversion=SpatialReference.meter_to_feet)
     for epsg, hits in epsgs[:5]:
         print "[EPSG:%d] %.0f%% hit" % (epsg, float(hits)/len(points)*100.0)
     """
@@ -63,7 +73,7 @@ class SpatialReference:
         return results
     """
 execfile("spatial_reference.py")
-SpatialReference.epsg_search("oregon")
+SpatialReference.epsg_search("Missouri")
 SpatialReference.epsg_search("Texas")
     """
 
@@ -78,7 +88,10 @@ SpatialReference.epsg_search("Texas")
         return load_content
 
     @staticmethod
-    def convert_spatial_reference(point_longitude, point_latitude, source, target):
+    def convert_spatial_reference(point_longitude, point_latitude, source, target, conversion=None):
+        if conversion:
+            point_latitude *= conversion
+            point_longitude *= conversion
         source_reference = osr.SpatialReference()
         source_reference.ImportFromEPSG(source)
         target_reference = osr.SpatialReference()
@@ -89,7 +102,10 @@ SpatialReference.epsg_search("Texas")
         return transformed_point.GetX(), transformed_point.GetY()
     """
     execfile("spatial_reference.py")
-    point_longitude = 686790.02595000004
-    point_latitude = 7647409.02929
-    SpatialReference.convert_spatial_reference(point_latitude, point_longitude, 2269, 4326)
+    point_latitude = 686790.02595000004
+    point_longitude = 7647409.02929
+    SpatialReference.convert_spatial_reference(point_longitude, point_latitude, 2269, 4326)
+    point_latitude = 1028833.0
+    point_longitude = 888708.3
+    SpatialReference.convert_spatial_reference(point_longitude, point_latitude, 2815, 4326, conversion=SpatialReference.meter_to_feet)
     """
