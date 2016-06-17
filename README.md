@@ -43,18 +43,19 @@ for epsg, hits in epsgs[:5]:
 [EPSG:2277] 0% hit
 ```
 
+The points could be in feet, so we can do:
 ```python
-# some points in St. Louis:
+# some points in St. Louis :
 points = [(894672.5, 995003.69999999995), (900456.30000000005, 1017035.0), (900456.30000000005, 1017035.0), (882164.59999999998, 999102.19999999995), (891889.30000000005, 1034635.0), (898334.0, 1022420.0), (894343.0, 1005425.0), (893510.30000000005, 1033772.0), (883747.80000000005, 1004093.0), (877404.59999999998, 1027557.0)]
-epsgs = SpatialReference.guess_the_projection(points, state="Missouri")
+epsgs = SpatialReference.guess_the_projection(points, state="Missouri", city="St. Louis", conversion=SpatialReference.meter_to_feet)
 for epsg, hits in epsgs[:5]:
     print "[EPSG:%d] %.0f%% hit" % (epsg, float(hits)/len(points)*100.0)
 ```
 
 ```bash
-[EPSG:26797] 100% hit
-[EPSG:26798] 100% hit
-[EPSG:26796] 80% hit
-[EPSG:2815] 0% hit
+[EPSG:2815] 100% hit
+[EPSG:3602] 100% hit
+[EPSG:26996] 100% hit
 [EPSG:2816] 0% hit
+[EPSG:2817] 0% hit
 ```
