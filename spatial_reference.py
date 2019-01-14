@@ -63,7 +63,7 @@ class SpatialReference:
         for epsg_html in epsgs:
             epsg = re.search("/ref/epsg/[0-9]*", epsg_html).group()
             epsg = int(epsg[10:])
-            description = re.search(": [A-Za-z/:>< 0-9]*", epsg_html).group()[2:-5]
+            description = re.search(": [A-Za-z/:>< 0-9\(\)]*", epsg_html).group()[2:-5]
             results.append((epsg, description))
         if re.search("Next Page", query_result):
             if page is None:
